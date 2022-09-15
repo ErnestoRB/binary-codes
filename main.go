@@ -10,8 +10,8 @@ var args = os.Args[1:]
 
 const(
     s = 1000
-    xGridNumber = 10
-    yGridNumber = 10
+    xGridNumber = 9
+    yGridNumber = 9
 ) 
 
 var widthY = float64(s / xGridNumber) // anchos de la celda
@@ -21,7 +21,7 @@ type Vector struct {
 	X, Y float64
 }
 
-var origin = Vector{X: 0, Y: yGridNumber/ 2}
+var origin = Vector{X: 0, Y: -yGridNumber/ 2}
 
 var Dc = gg.NewContext(s, s)
 
@@ -35,34 +35,62 @@ func main() {
 		println("No introduciste un número válido (byte) (0-255)")
 		os.Exit(1)
 	}
+	error := Dc.LoadFontFace("fonts/UbuntuMono.ttf",100)
+	if(error != nil) {
+		println("No se pudo cargar correctamente la fuente")
+		os.Exit(1)
+	}
 	byteValue := uint8(value)
-    setup(Dc)
+    setup(Dc, byteValue, "NRZL")
 	nrzl(byteValue)
 	Dc.SavePNG("nrzl.png")
-    setup(Dc)
+    setup(Dc, byteValue, "NRZI")
 	nrzi(byteValue)
 	Dc.SavePNG("nrzi.png")
-    setup(Dc)
+    setup(Dc, byteValue, "Bipolar AMI")
 	bami(byteValue)
 	Dc.SavePNG("bipolar_ami.png")
-    setup(Dc)
+    setup(Dc, byteValue, "Pseudoternario")
 	ptern(byteValue)
 	Dc.SavePNG("pseudo_tern.png")
 }
 
 func drawLine(dc *gg.Context, base, dir  Vector) {
-	realBase := Vector{X: (origin.X + base.X) * widthX, Y: (origin.Y - base.Y) * widthY}
-	realDir := Vector{X: dir.X * widthX, Y: -dir.Y * widthY}
-	dc.DrawLine(realBase.X, realBase.Y , realBase.X + realDir.X, realBase.Y + realDir.Y )
+	displacedBase := changeOrigin(base)
+	normalizedBase := normalizeVector(displacedBase)
+	final := Vector{displacedBase.X + dir.X, displacedBase.Y + dir.Y}
+	normalizedFinal := normalizeVector(final)
+	dc.DrawLine(normalizedBase.X, -normalizedBase.Y , normalizedFinal.X, -normalizedFinal.Y)
 	dc.SetRGB(0,0,1)
 	dc.SetLineWidth(10)
 	dc.Stroke()
 }
 
-func setup(dc *gg.Context) {
+func drawTitle(dc *gg.Context, title string) {
+	dc.SetRGB(1,0,0)
+	dc.DrawString(title,10,100)
+}
+
+func setup(dc *gg.Context, b uint8, title string) {
 	dc.SetRGB(1,1,1)
 	dc.Clear()
+	drawTitle(dc,title)
+	dc.SetRGB(1,0,0)
+	dc.DrawString(binaryString(b),10,200)
+	drawTextAt(dc, Vector{8,0}, "0")
+	drawTextAt(dc, Vector{8,1}, "1")
+	drawTextAt(dc, Vector{8,-1}, "-1")
+	arr := toBinaryArray(b)
+	for pos := 0; pos < 8; pos++ {
+		drawTextAt(Dc,Vector{float64(pos),-2}, strconv.FormatUint(uint64(arr[pos]), 2))
+	}
 	grid(dc)
+}
+
+func drawTextAt(dc *gg.Context, base  Vector, str string) {
+	dc.SetRGB(0,1,0)
+	realBase := normalizeVector(changeOrigin(base))
+	dc.DrawString(str,realBase.X,-realBase.Y)
 }
 
 func grid(dc *gg.Context) {
