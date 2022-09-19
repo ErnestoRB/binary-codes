@@ -8,5 +8,5 @@ We are currently supporting 6 binary codes
 2. NRZL (No Return to Zero Level)
 3. Bipolar AMI (Alternate Mark Inverted)
 4. Pseudoternary
-5.
-6.
+5. Manchester Encoding
+6. Differential Manchester Encoding
