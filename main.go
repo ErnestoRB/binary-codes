@@ -53,6 +53,9 @@ func main() {
     setup(Dc, byteValue, "Pseudoternario")
 	ptern(byteValue)
 	Dc.SavePNG("pseudo_tern.png")
+	setup(Dc, byteValue, "Manchester Diferencial")
+	mandiff(byteValue)
+	Dc.SavePNG("man_differential.png")
 }
 
 func drawLine(dc *gg.Context, base, dir  Vector) {
