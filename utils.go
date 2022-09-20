@@ -12,11 +12,11 @@ func changeOrigin(base Vector) Vector {
 }
 
 func toBinaryArray(b uint8) (arr [8]uint8) {
-	for i := 0; i < 8; i++ {
+	for i := 7; i >= 0; i-- {
 		var maskBit uint8 = 1 << i
 		nBit := b & maskBit
 		nBit >>= i
-		arr[i] =nBit
+		arr[7 - i] =nBit
 	}
 	return
 }
